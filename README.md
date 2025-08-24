@@ -72,10 +72,9 @@ npm install n8n -g
 n8n start
 ```
 
-### Opção 3: n8n Cloud
-- Acesse n8n.cloud
-- Cadastre-se gratuitamente
-- Comece imediatamente
+### Opção 3: n8n Self Hosted
+- Assista o vídeo de como hospedar seu próprio servidor de n8n
+🎥 **n8n Self Hosted:** [[youtube.com/@jonathandacruz](https://youtu.be/GsRs2B99ZoA)] 
 
 ### Configurações Iniciais
 - **URL Base**: http://localhost:5678
