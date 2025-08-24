@@ -1,0 +1,1423 @@
+{
+  "name": "n8n Templates Collection",
+  "description": "Coleção de templates JSON para n8n - Do básico ao avançado",
+  "version": "1.0.0",
+  "templates": {
+    
+    "1_hello_world": {
+      "name": "Hello World - Primeiro Workflow",
+      "nodes": [
+        {
+          "parameters": {},
+          "id": "f1d2c3b4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
+          "name": "When clicking 'Test workflow'",
+          "type": "n8n-nodes-base.manualTrigger",
+          "typeVersion": 1,
+          "position": [240, 300]
+        },
+        {
+          "parameters": {
+            "values": {
+              "string": [
+                {
+                  "name": "message",
+                  "value": "Hello World from n8n!"
+                },
+                {
+                  "name": "timestamp",
+                  "value": "={{ $now }}"
+                },
+                {
+                  "name": "workflow_name",
+                  "value": "Meu Primeiro Workflow"
+                }
+              ]
+            }
+          },
+          "id": "a1b2c3d4-5e6f-7g8h-9i0j-1k2l3m4n5o6p",
+          "name": "Set Data",
+          "type": "n8n-nodes-base.set",
+          "typeVersion": 1,
+          "position": [460, 300]
+        }
+      ],
+      "connections": {
+        "When clicking 'Test workflow'": {
+          "main": [
+            [
+              {
+                "node": "Set Data",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        }
+      }
+    },
+
+    "2_webhook_api": {
+      "name": "Webhook API Simples",
+      "nodes": [
+        {
+          "parameters": {
+            "httpMethod": "POST",
+            "path": "api/dados",
+            "responseMode": "responseNode"
+          },
+          "id": "webhook-node-001",
+          "name": "Webhook",
+          "type": "n8n-nodes-base.webhook",
+          "typeVersion": 1,
+          "position": [240, 300],
+          "webhookId": "webhook-api-dados"
+        },
+        {
+          "parameters": {
+            "values": {
+              "string": [
+                {
+                  "name": "status",
+                  "value": "received"
+                },
+                {
+                  "name": "received_data",
+                  "value": "={{ JSON.stringify($json) }}"
+                },
+                {
+                  "name": "timestamp",
+                  "value": "={{ $now.format('YYYY-MM-DD HH:mm:ss') }}"
+                }
+              ]
+            }
+          },
+          "id": "process-data-001",
+          "name": "Process Data",
+          "type": "n8n-nodes-base.set",
+          "typeVersion": 1,
+          "position": [460, 300]
+        },
+        {
+          "parameters": {
+            "respondWith": "json",
+            "responseBody": {
+              "success": true,
+              "message": "Dados recebidos com sucesso",
+              "data": "={{ $json }}",
+              "timestamp": "={{ $now }}"
+            }
+          },
+          "id": "response-node-001",
+          "name": "Webhook Response",
+          "type": "n8n-nodes-base.respondToWebhook",
+          "typeVersion": 1,
+          "position": [680, 300]
+        }
+      ],
+      "connections": {
+        "Webhook": {
+          "main": [
+            [
+              {
+                "node": "Process Data",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Process Data": {
+          "main": [
+            [
+              {
+                "node": "Webhook Response",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        }
+      }
+    },
+
+    "3_email_automation": {
+      "name": "Automação de Email com Validação",
+      "nodes": [
+        {
+          "parameters": {},
+          "id": "manual-trigger-email",
+          "name": "Manual Trigger",
+          "type": "n8n-nodes-base.manualTrigger",
+          "typeVersion": 1,
+          "position": [240, 300]
+        },
+        {
+          "parameters": {
+            "values": {
+              "string": [
+                {
+                  "name": "email",
+                  "value": "usuario@exemplo.com"
+                },
+                {
+                  "name": "nome",
+                  "value": "João Silva"
+                },
+                {
+                  "name": "assunto",
+                  "value": "Bem-vindo ao nosso sistema!"
+                }
+              ]
+            }
+          },
+          "id": "set-email-data",
+          "name": "Set Email Data",
+          "type": "n8n-nodes-base.set",
+          "typeVersion": 1,
+          "position": [460, 300]
+        },
+        {
+          "parameters": {
+            "conditions": {
+              "string": [
+                {
+                  "value1": "={{ $json.email }}",
+                  "operation": "regex",
+                  "value2": "^[\\w\\.-]+@[\\w\\.-]+\\.[a-zA-Z]{2,}$"
+                }
+              ]
+            }
+          },
+          "id": "validate-email",
+          "name": "Validate Email",
+          "type": "n8n-nodes-base.if",
+          "typeVersion": 1,
+          "position": [680, 300]
+        },
+        {
+          "parameters": {
+            "sendTo": "={{ $json.email }}",
+            "subject": "={{ $json.assunto }}",
+            "message": "Olá {{ $json.nome }},\n\nSeu cadastro foi realizado com sucesso!\n\nData: {{ $now.format('DD/MM/YYYY HH:mm') }}\n\nAtenciosamente,\nEquipe n8n"
+          },
+          "id": "send-email",
+          "name": "Send Email",
+          "type": "n8n-nodes-base.emailSend",
+          "typeVersion": 2,
+          "position": [900, 200]
+        },
+        {
+          "parameters": {
+            "values": {
+              "string": [
+                {
+                  "name": "error",
+                  "value": "Email inválido"
+                },
+                {
+                  "name": "email_provided",
+                  "value": "={{ $json.email }}"
+                }
+              ]
+            }
+          },
+          "id": "invalid-email",
+          "name": "Invalid Email",
+          "type": "n8n-nodes-base.set",
+          "typeVersion": 1,
+          "position": [900, 400]
+        }
+      ],
+      "connections": {
+        "Manual Trigger": {
+          "main": [
+            [
+              {
+                "node": "Set Email Data",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Set Email Data": {
+          "main": [
+            [
+              {
+                "node": "Validate Email",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Validate Email": {
+          "main": [
+            [
+              {
+                "node": "Send Email",
+                "type": "main",
+                "index": 0
+              }
+            ],
+            [
+              {
+                "node": "Invalid Email",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        }
+      }
+    },
+
+    "4_database_integration": {
+      "name": "Integração com Banco de Dados",
+      "nodes": [
+        {
+          "parameters": {
+            "rule": {
+              "interval": [
+                {
+                  "field": "cronExpression",
+                  "expression": "0 */30 * * * *"
+                }
+              ]
+            }
+          },
+          "id": "cron-trigger-db",
+          "name": "Every 30 minutes",
+          "type": "n8n-nodes-base.cron",
+          "typeVersion": 1,
+          "position": [240, 300]
+        },
+        {
+          "parameters": {
+            "operation": "executeQuery",
+            "query": "SELECT \n  id,\n  nome,\n  email,\n  created_at\nFROM usuarios \nWHERE \n  active = true \n  AND created_at >= NOW() - INTERVAL '1 day'\nORDER BY created_at DESC\nLIMIT 100"
+          },
+          "id": "postgres-query",
+          "name": "Get New Users",
+          "type": "n8n-nodes-base.postgres",
+          "typeVersion": 2.4,
+          "position": [460, 300],
+          "credentials": {
+            "postgres": {
+              "id": "postgres-credentials",
+              "name": "PostgreSQL Credentials"
+            }
+          }
+        },
+        {
+          "parameters": {
+            "jsCode": "// Processa dados dos usuários\nconst items = $input.all();\nconst processedUsers = [];\n\nfor (const item of items) {\n  const user = item.json;\n  \n  // Formatar dados\n  const processedUser = {\n    id: user.id,\n    nome: user.nome.trim(),\n    email: user.email.toLowerCase(),\n    cadastro_formatado: new Date(user.created_at).toLocaleDateString('pt-BR'),\n    dias_desde_cadastro: Math.floor((new Date() - new Date(user.created_at)) / (1000 * 60 * 60 * 24)),\n    status: 'processado',\n    timestamp_processamento: new Date().toISOString()\n  };\n  \n  processedUsers.push({ json: processedUser });\n}\n\nreturn processedUsers;"
+          },
+          "id": "process-users",
+          "name": "Process Users",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [680, 300]
+        },
+        {
+          "parameters": {
+            "conditions": {
+              "number": [
+                {
+                  "value1": "={{ $json.length }}",
+                  "operation": "larger",
+                  "value2": 0
+                }
+              ]
+            }
+          },
+          "id": "check-users-exist",
+          "name": "Has New Users?",
+          "type": "n8n-nodes-base.if",
+          "typeVersion": 1,
+          "position": [900, 300]
+        },
+        {
+          "parameters": {
+            "operation": "executeQuery",
+            "query": "INSERT INTO user_reports (total_users, report_date, created_at)\nVALUES ({{ $json.length }}, CURRENT_DATE, NOW())"
+          },
+          "id": "insert-report",
+          "name": "Insert Report",
+          "type": "n8n-nodes-base.postgres",
+          "typeVersion": 2.4,
+          "position": [1120, 200],
+          "credentials": {
+            "postgres": {
+              "id": "postgres-credentials",
+              "name": "PostgreSQL Credentials"
+            }
+          }
+        }
+      ],
+      "connections": {
+        "Every 30 minutes": {
+          "main": [
+            [
+              {
+                "node": "Get New Users",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Get New Users": {
+          "main": [
+            [
+              {
+                "node": "Process Users",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Process Users": {
+          "main": [
+            [
+              {
+                "node": "Has New Users?",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Has New Users?": {
+          "main": [
+            [
+              {
+                "node": "Insert Report",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        }
+      }
+    },
+
+    "5_api_integration": {
+      "name": "Integração com APIs Externas",
+      "nodes": [
+        {
+          "parameters": {},
+          "id": "manual-api-trigger",
+          "name": "Manual Trigger",
+          "type": "n8n-nodes-base.manualTrigger",
+          "typeVersion": 1,
+          "position": [240, 300]
+        },
+        {
+          "parameters": {
+            "values": {
+              "string": [
+                {
+                  "name": "cep",
+                  "value": "01310-100"
+                }
+              ]
+            }
+          },
+          "id": "set-cep",
+          "name": "Set CEP",
+          "type": "n8n-nodes-base.set",
+          "typeVersion": 1,
+          "position": [460, 300]
+        },
+        {
+          "parameters": {
+            "url": "=https://viacep.com.br/ws/{{ $json.cep.replace('-', '') }}/json/",
+            "options": {
+              "timeout": 10000
+            }
+          },
+          "id": "get-address",
+          "name": "Get Address",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.1,
+          "position": [680, 300]
+        },
+        {
+          "parameters": {
+            "conditions": {
+              "boolean": [
+                {
+                  "value1": "={{ $json.erro === undefined }}",
+                  "value2": true
+                }
+              ]
+            }
+          },
+          "id": "check-valid-cep",
+          "name": "Valid CEP?",
+          "type": "n8n-nodes-base.if",
+          "typeVersion": 1,
+          "position": [900, 300]
+        },
+        {
+          "parameters": {
+            "values": {
+              "string": [
+                {
+                  "name": "endereco_completo",
+                  "value": "={{ $json.logradouro }}, {{ $json.bairro }}, {{ $json.localidade }} - {{ $json.uf }}"
+                },
+                {
+                  "name": "cep_formatado",
+                  "value": "={{ $json.cep }}"
+                },
+                {
+                  "name": "coordenadas",
+                  "value": "Lat: {{ $json.lat || 'N/A' }}, Lng: {{ $json.lng || 'N/A' }}"
+                },
+                {
+                  "name": "processado_em",
+                  "value": "={{ $now.format('DD/MM/YYYY HH:mm:ss') }}"
+                }
+              ]
+            }
+          },
+          "id": "format-address",
+          "name": "Format Address",
+          "type": "n8n-nodes-base.set",
+          "typeVersion": 1,
+          "position": [1120, 200]
+        },
+        {
+          "parameters": {
+            "values": {
+              "string": [
+                {
+                  "name": "erro",
+                  "value": "CEP não encontrado"
+                },
+                {
+                  "name": "cep_informado",
+                  "value": "={{ $('Set CEP').item.json.cep }}"
+                }
+              ]
+            }
+          },
+          "id": "cep-error",
+          "name": "CEP Error",
+          "type": "n8n-nodes-base.set",
+          "typeVersion": 1,
+          "position": [1120, 400]
+        }
+      ],
+      "connections": {
+        "Manual Trigger": {
+          "main": [
+            [
+              {
+                "node": "Set CEP",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Set CEP": {
+          "main": [
+            [
+              {
+                "node": "Get Address",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Get Address": {
+          "main": [
+            [
+              {
+                "node": "Valid CEP?",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Valid CEP?": {
+          "main": [
+            [
+              {
+                "node": "Format Address",
+                "type": "main",
+                "index": 0
+              }
+            ],
+            [
+              {
+                "node": "CEP Error",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        }
+      }
+    },
+
+    "6_error_handling": {
+      "name": "Tratamento de Erros Avançado",
+      "nodes": [
+        {
+          "parameters": {},
+          "id": "manual-error-trigger",
+          "name": "Manual Trigger",
+          "type": "n8n-nodes-base.manualTrigger",
+          "typeVersion": 1,
+          "position": [240, 300]
+        },
+        {
+          "parameters": {
+            "jsCode": "// Simula diferentes cenários de erro\nconst scenarios = [\n  { type: 'success', data: { status: 'ok', message: 'Tudo funcionando' } },\n  { type: 'api_error', data: null, error: 'API não respondeu' },\n  { type: 'data_error', data: { status: 'invalid' }, error: 'Dados inválidos' }\n];\n\n// Escolhe cenário aleatório\nconst scenario = scenarios[Math.floor(Math.random() * scenarios.length)];\n\nif (scenario.type === 'success') {\n  return [{ json: scenario.data }];\n} else {\n  throw new Error(scenario.error);\n}"
+          },
+          "id": "simulate-process",
+          "name": "Simulate Process",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [460, 300],
+          "continueOnFail": true
+        },
+        {
+          "parameters": {
+            "conditions": {
+              "boolean": [
+                {
+                  "value1": "={{ $json.error === undefined }}",
+                  "value2": true
+                }
+              ]
+            }
+          },
+          "id": "check-success",
+          "name": "Success?",
+          "type": "n8n-nodes-base.if",
+          "typeVersion": 1,
+          "position": [680, 300]
+        },
+        {
+          "parameters": {
+            "values": {
+              "string": [
+                {
+                  "name": "status",
+                  "value": "success"
+                },
+                {
+                  "name": "message",
+                  "value": "Processamento concluído com sucesso"
+                },
+                {
+                  "name": "timestamp",
+                  "value": "={{ $now }}"
+                },
+                {
+                  "name": "data",
+                  "value": "={{ JSON.stringify($json) }}"
+                }
+              ]
+            }
+          },
+          "id": "success-handler",
+          "name": "Success Handler",
+          "type": "n8n-nodes-base.set",
+          "typeVersion": 1,
+          "position": [900, 200]
+        },
+        {
+          "parameters": {
+            "values": {
+              "string": [
+                {
+                  "name": "status",
+                  "value": "error"
+                },
+                {
+                  "name": "error_message",
+                  "value": "={{ $json.error.message || 'Erro desconhecido' }}"
+                },
+                {
+                  "name": "error_details",
+                  "value": "={{ JSON.stringify($json.error) }}"
+                },
+                {
+                  "name": "timestamp",
+                  "value": "={{ $now }}"
+                },
+                {
+                  "name": "retry_count",
+                  "value": "0"
+                }
+              ]
+            }
+          },
+          "id": "error-handler",
+          "name": "Error Handler",
+          "type": "n8n-nodes-base.set",
+          "typeVersion": 1,
+          "position": [900, 400]
+        },
+        {
+          "parameters": {
+            "conditions": {
+              "string": [
+                {
+                  "value1": "={{ $json.error_message }}",
+                  "operation": "contains",
+                  "value2": "API não respondeu"
+                }
+              ]
+            }
+          },
+          "id": "check-retry",
+          "name": "Should Retry?",
+          "type": "n8n-nodes-base.if",
+          "typeVersion": 1,
+          "position": [1120, 400]
+        },
+        {
+          "parameters": {
+            "amount": 5,
+            "unit": "seconds"
+          },
+          "id": "wait-retry",
+          "name": "Wait 5s",
+          "type": "n8n-nodes-base.wait",
+          "typeVersion": 1,
+          "position": [1340, 300]
+        },
+        {
+          "parameters": {
+            "values": {
+              "string": [
+                {
+                  "name": "status",
+                  "value": "failed_permanent"
+                },
+                {
+                  "name": "final_error",
+                  "value": "={{ $json.error_message }}"
+                }
+              ]
+            }
+          },
+          "id": "permanent-failure",
+          "name": "Permanent Failure",
+          "type": "n8n-nodes-base.set",
+          "typeVersion": 1,
+          "position": [1340, 500]
+        }
+      ],
+      "connections": {
+        "Manual Trigger": {
+          "main": [
+            [
+              {
+                "node": "Simulate Process",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Simulate Process": {
+          "main": [
+            [
+              {
+                "node": "Check Success",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Check Success": {
+          "main": [
+            [
+              {
+                "node": "Success Handler",
+                "type": "main",
+                "index": 0
+              }
+            ],
+            [
+              {
+                "node": "Error Handler",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Error Handler": {
+          "main": [
+            [
+              {
+                "node": "Should Retry?",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Should Retry?": {
+          "main": [
+            [
+              {
+                "node": "Wait 5s",
+                "type": "main",
+                "index": 0
+              }
+            ],
+            [
+              {
+                "node": "Permanent Failure",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        }
+      }
+    },
+
+    "7_slack_integration": {
+      "name": "Integração com Slack para Alertas",
+      "nodes": [
+        {
+          "parameters": {
+            "httpMethod": "POST",
+            "path": "alert",
+            "responseMode": "responseNode"
+          },
+          "id": "webhook-alert",
+          "name": "Webhook Alert",
+          "type": "n8n-nodes-base.webhook",
+          "typeVersion": 1,
+          "position": [240, 300],
+          "webhookId": "alert-webhook"
+        },
+        {
+          "parameters": {
+            "jsCode": "// Processa dados do alerta\nconst alertData = $input.first().json;\n\n// Define níveis de severidade\nconst severityLevels = {\n  'low': { color: 'good', emoji: '🟢', priority: 1 },\n  'medium': { color: 'warning', emoji: '🟡', priority: 2 },\n  'high': { color: 'danger', emoji: '🔴', priority: 3 },\n  'critical': { color: 'danger', emoji: '🚨', priority: 4 }\n};\n\nconst severity = alertData.severity || 'medium';\nconst severityInfo = severityLevels[severity] || severityLevels['medium'];\n\n// Formatar dados do alerta\nconst formattedAlert = {\n  title: alertData.title || 'Alerta do Sistema',\n  message: alertData.message || 'Sem mensagem especificada',\n  severity: severity,\n  severityInfo: severityInfo,\n  timestamp: new Date().toISOString(),\n  source: alertData.source || 'n8n-workflow',\n  details: alertData.details || {},\n  formatted_time: new Date().toLocaleString('pt-BR', {\n    timeZone: 'America/Sao_Paulo',\n    day: '2-digit',\n    month: '2-digit',\n    year: 'numeric',\n    hour: '2-digit',\n    minute: '2-digit',\n    second: '2-digit'\n  })\n};\n\nreturn [{ json: formattedAlert }];"
+          },
+          "id": "process-alert",
+          "name": "Process Alert",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [460, 300]
+        },
+        {
+          "parameters": {
+            "conditions": {
+              "string": [
+                {
+                  "value1": "={{ $json.severity }}",
+                  "operation": "equal",
+                  "value2": "critical"
+                }
+              ]
+            }
+          },
+          "id": "check-critical",
+          "name": "Is Critical?",
+          "type": "n8n-nodes-base.if",
+          "typeVersion": 1,
+          "position": [680, 300]
+        },
+        {
+          "parameters": {
+            "channel": "#alerts-critical",
+            "text": "{{ $json.severityInfo.emoji }} **ALERTA CRÍTICO** {{ $json.severityInfo.emoji }}",
+            "attachments": [
+              {
+                "color": "{{ $json.severityInfo.color }}",
+                "title": "{{ $json.title }}",
+                "text": "{{ $json.message }}",
+                "fields": [
+                  {
+                    "title": "Severidade",
+                    "value": "{{ $json.severity.toUpperCase() }}",
+                    "short": true
+                  },
+                  {
+                    "title": "Origem",
+                    "value": "{{ $json.source }}",
+                    "short": true
+                  },
+                  {
+                    "title": "Horário",
+                    "value": "{{ $json.formatted_time }}",
+                    "short": true
+                  },
+                  {
+                    "title": "Detalhes",
+                    "value": "```{{ JSON.stringify($json.details, null, 2) }}```",
+                    "short": false
+                  }
+                ]
+              }
+            ]
+          },
+          "id": "slack-critical",
+          "name": "Slack Critical",
+          "type": "n8n-nodes-base.slack",
+          "typeVersion": 2.1,
+          "position": [900, 200],
+          "credentials": {
+            "slackApi": {
+              "id": "slack-credentials",
+              "name": "Slack Credentials"
+            }
+          }
+        },
+        {
+          "parameters": {
+            "channel": "#alerts-general",
+            "text": "{{ $json.severityInfo.emoji }} {{ $json.title }}",
+            "attachments": [
+              {
+                "color": "{{ $json.severityInfo.color }}",
+                "text": "{{ $json.message }}",
+                "fields": [
+                  {
+                    "title": "Severidade",
+                    "value": "{{ $json.severity.toUpperCase() }}",
+                    "short": true
+                  },
+                  {
+                    "title": "Horário",
+                    "value": "{{ $json.formatted_time }}",
+                    "short": true
+                  }
+                ]
+              }
+            ]
+          },
+          "id": "slack-general",
+          "name": "Slack General",
+          "type": "n8n-nodes-base.slack",
+          "typeVersion": 2.1,
+          "position": [900, 400],
+          "credentials": {
+            "slackApi": {
+              "id": "slack-credentials",
+              "name": "Slack Credentials"
+            }
+          }
+        },
+        {
+          "parameters": {
+            "respondWith": "json",
+            "responseBody": {
+              "success": true,
+              "message": "Alerta processado e enviado",
+              "alert_id": "{{ $json.timestamp }}",
+              "severity": "{{ $json.severity }}",
+              "sent_to": "slack"
+            }
+          },
+          "id": "webhook-response",
+          "name": "Webhook Response",
+          "type": "n8n-nodes-base.respondToWebhook",
+          "typeVersion": 1,
+          "position": [1120, 300]
+        }
+      ],
+      "connections": {
+        "Webhook Alert": {
+          "main": [
+            [
+              {
+                "node": "Process Alert",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Process Alert": {
+          "main": [
+            [
+              {
+                "node": "Is Critical?",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Is Critical?": {
+          "main": [
+            [
+              {
+                "node": "Slack Critical",
+                "type": "main",
+                "index": 0
+              }
+            ],
+            [
+              {
+                "node": "Slack General",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Slack Critical": {
+          "main": [
+            [
+              {
+                "node": "Webhook Response",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Slack General": {
+          "main": [
+            [
+              {
+                "node": "Webhook Response",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        }
+      }
+    },
+
+    "8_file_processing": {
+      "name": "Processamento de Arquivos CSV",
+      "nodes": [
+        {
+          "parameters": {
+            "httpMethod": "POST",
+            "path": "upload-csv",
+            "options": {
+              "binaryData": true
+            }
+          },
+          "id": "webhook-file-upload",
+          "name": "File Upload Webhook",
+          "type": "n8n-nodes-base.webhook",
+          "typeVersion": 1,
+          "position": [240, 300],
+          "webhookId": "file-upload-webhook"
+        },
+        {
+          "parameters": {
+            "options": {
+              "delimiter": ",",
+              "enableBOM": false,
+              "headerRow": true
+            }
+          },
+          "id": "read-csv",
+          "name": "Read CSV",
+          "type": "n8n-nodes-base.readBinaryFile",
+          "typeVersion": 1,
+          "position": [460, 300]
+        },
+        {
+          "parameters": {
+            "jsCode": "// Processa dados do CSV\nconst items = $input.all();\nconst processedData = [];\nconst errors = [];\n\nfor (const item of items) {\n  try {\n    const data = item.json;\n    \n    // Validações básicas\n    if (!data.email || !data.nome) {\n      errors.push({\n        linha: items.indexOf(item) + 2, // +2 porque começa do 1 e tem header\n        erro: 'Email ou nome em branco',\n        dados: data\n      });\n      continue;\n    }\n    \n    // Validar email\n    const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\n    if (!emailRegex.test(data.email)) {\n      errors.push({\n        linha: items.indexOf(item) + 2,\n        erro: 'Email inválido',\n        dados: data\n      });\n      continue;\n    }\n    \n    // Processar dados válidos\n    processedData.push({\n      nome: data.nome.trim(),\n      email: data.email.toLowerCase().trim(),\n      telefone: data.telefone || '',\n      empresa: data.empresa || '',\n      processado_em: new Date().toISOString(),\n      status: 'validado'\n    });\n    \n  } catch (error) {\n    errors.push({\n      linha: items.indexOf(item) + 2,\n      erro: error.message,\n      dados: item.json\n    });\n  }\n}\n\nreturn [{\n  json: {\n    total_linhas: items.length,\n    dados_validos: processedData.length,\n    dados_com_erro: errors.length,\n    dados_processados: processedData,\n    erros: errors,\n    resumo: {\n      taxa_sucesso: ((processedData.length / items.length) * 100).toFixed(2) + '%',\n      processado_em: new Date().toLocaleString('pt-BR')\n    }\n  }\n}];"
+          },
+          "id": "process-csv-data",
+          "name": "Process CSV Data",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [680, 300]
+        },
+        {
+          "parameters": {
+            "conditions": {
+              "number": [
+                {
+                  "value1": "={{ $json.dados_validos }}",
+                  "operation": "larger",
+                  "value2": 0
+                }
+              ]
+            }
+          },
+          "id": "has-valid-data",
+          "name": "Has Valid Data?",
+          "type": "n8n-nodes-base.if",
+          "typeVersion": 1,
+          "position": [900, 300]
+        },
+        {
+          "parameters": {
+            "operation": "executeQuery",
+            "query": "INSERT INTO usuarios_importados (nome, email, telefone, empresa, processado_em, status)\nVALUES\n{% for item in $json.dados_processados %}\n  ('{{ item.nome }}', '{{ item.email }}', '{{ item.telefone }}', '{{ item.empresa }}', '{{ item.processado_em }}', '{{ item.status }}'){% if not loop.last %},{% endif %}\n{% endfor %}"
+          },
+          "id": "insert-valid-data",
+          "name": "Insert Valid Data",
+          "type": "n8n-nodes-base.postgres",
+          "typeVersion": 2.4,
+          "position": [1120, 200],
+          "credentials": {
+            "postgres": {
+              "id": "postgres-credentials",
+              "name": "PostgreSQL Credentials"
+            }
+          }
+        },
+        {
+          "parameters": {
+            "respondWith": "json",
+            "responseBody": {
+              "success": true,
+              "message": "CSV processado com sucesso",
+              "estatisticas": "={{ $json.resumo }}",
+              "dados_validos": "={{ $json.dados_validos }}",
+              "erros": "={{ $json.dados_com_erro }}",
+              "detalhes_erros": "={{ $json.erros }}"
+            }
+          },
+          "id": "success-response",
+          "name": "Success Response",
+          "type": "n8n-nodes-base.respondToWebhook",
+          "typeVersion": 1,
+          "position": [1340, 200]
+        },
+        {
+          "parameters": {
+            "respondWith": "json",
+            "responseBody": {
+              "success": false,
+              "message": "Nenhum dado válido encontrado no CSV",
+              "erros": "={{ $json.erros }}",
+              "total_linhas": "={{ $json.total_linhas }}"
+            }
+          },
+          "id": "error-response",
+          "name": "Error Response",
+          "type": "n8n-nodes-base.respondToWebhook",
+          "typeVersion": 1,
+          "position": [1120, 400]
+        }
+      ],
+      "connections": {
+        "File Upload Webhook": {
+          "main": [
+            [
+              {
+                "node": "Read CSV",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Read CSV": {
+          "main": [
+            [
+              {
+                "node": "Process CSV Data",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Process CSV Data": {
+          "main": [
+            [
+              {
+                "node": "Has Valid Data?",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Has Valid Data?": {
+          "main": [
+            [
+              {
+                "node": "Insert Valid Data",
+                "type": "main",
+                "index": 0
+              }
+            ],
+            [
+              {
+                "node": "Error Response",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Insert Valid Data": {
+          "main": [
+            [
+              {
+                "node": "Success Response",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        }
+      }
+    },
+
+    "9_advanced_monitoring": {
+      "name": "Monitoramento Avançado de Sistema",
+      "nodes": [
+        {
+          "parameters": {
+            "rule": {
+              "interval": [
+                {
+                  "field": "cronExpression",
+                  "expression": "0 */2 * * * *"
+                }
+              ]
+            }
+          },
+          "id": "monitor-trigger",
+          "name": "Every 2 Minutes",
+          "type": "n8n-nodes-base.cron",
+          "typeVersion": 1,
+          "position": [240, 300]
+        },
+        {
+          "parameters": {
+            "jsCode": "// Lista de serviços para monitorar\nconst services = [\n  {\n    name: 'API Principal',\n    url: 'https://api.exemplo.com/health',\n    timeout: 5000,\n    expectedStatus: 200\n  },\n  {\n    name: 'Website',\n    url: 'https://www.exemplo.com',\n    timeout: 10000,\n    expectedStatus: 200\n  },\n  {\n    name: 'Banco de Dados',\n    url: 'https://api.exemplo.com/db-health',\n    timeout: 3000,\n    expectedStatus: 200\n  }\n];\n\nreturn services.map(service => ({ json: service }));"
+          },
+          "id": "setup-services",
+          "name": "Setup Services",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [460, 300]
+        },
+        {
+          "parameters": {
+            "url": "={{ $json.url }}",
+            "options": {
+              "timeout": "={{ $json.timeout }}",
+              "redirect": {
+                "redirect": {
+                  "followRedirects": true,
+                  "maxRedirects": 3
+                }
+              }
+            }
+          },
+          "id": "check-service",
+          "name": "Check Service",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.1,
+          "position": [680, 300],
+          "continueOnFail": true
+        },
+        {
+          "parameters": {
+            "jsCode": "// Processa resposta do health check\nconst items = $input.all();\nconst results = [];\nconst alerts = [];\n\nfor (const item of items) {\n  const originalService = item.json;\n  const response = item.json.response || {};\n  const error = item.json.error;\n  \n  const startTime = new Date(item.json.startTime || Date.now());\n  const endTime = new Date();\n  const responseTime = endTime - startTime;\n  \n  const result = {\n    service_name: originalService.name,\n    url: originalService.url,\n    expected_status: originalService.expectedStatus,\n    actual_status: response.status || 0,\n    response_time: responseTime,\n    is_healthy: !error && (response.status === originalService.expectedStatus),\n    error_message: error ? error.message : null,\n    checked_at: new Date().toISOString(),\n    timestamp: Date.now()\n  };\n  \n  results.push(result);\n  \n  // Gerar alertas para serviços com problema\n  if (!result.is_healthy) {\n    alerts.push({\n      service: result.service_name,\n      issue: error ? 'Conexão falhou' : `Status ${result.actual_status} (esperado ${result.expected_status})`,\n      url: result.url,\n      response_time: result.response_time,\n      timestamp: result.checked_at\n    });\n  }\n}\n\nreturn [{\n  json: {\n    total_services: results.length,\n    healthy_services: results.filter(r => r.is_healthy).length,\n    unhealthy_services: results.filter(r => !r.is_healthy).length,\n    average_response_time: results.reduce((sum, r) => sum + r.response_time, 0) / results.length,\n    results: results,\n    alerts: alerts,\n    summary: {\n      status: alerts.length === 0 ? 'ALL_HEALTHY' : 'ISSUES_DETECTED',\n      checked_at: new Date().toLocaleString('pt-BR')\n    }\n  }\n}];"
+          },
+          "id": "process-results",
+          "name": "Process Results",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [900, 300]
+        },
+        {
+          "parameters": {
+            "conditions": {
+              "number": [
+                {
+                  "value1": "={{ $json.alerts.length }}",
+                  "operation": "larger",
+                  "value2": 0
+                }
+              ]
+            }
+          },
+          "id": "has-alerts",
+          "name": "Has Alerts?",
+          "type": "n8n-nodes-base.if",
+          "typeVersion": 1,
+          "position": [1120, 300]
+        },
+        {
+          "parameters": {
+            "operation": "executeQuery",
+            "query": "INSERT INTO system_monitoring (total_services, healthy_services, unhealthy_services, average_response_time, status, checked_at, alerts)\nVALUES ({{ $json.total_services }}, {{ $json.healthy_services }}, {{ $json.unhealthy_services }}, {{ $json.average_response_time }}, '{{ $json.summary.status }}', NOW(), '{{ JSON.stringify($json.alerts) }}')"
+          },
+          "id": "log-monitoring",
+          "name": "Log Monitoring",
+          "type": "n8n-nodes-base.postgres",
+          "typeVersion": 2.4,
+          "position": [1340, 200],
+          "credentials": {
+            "postgres": {
+              "id": "postgres-credentials",
+              "name": "PostgreSQL Credentials"
+            }
+          }
+        },
+        {
+          "parameters": {
+            "channel": "#system-alerts",
+            "text": "🚨 **ALERTA DE SISTEMA** 🚨",
+            "attachments": [
+              {
+                "color": "danger",
+                "title": "Serviços com Problema",
+                "text": "{{ $json.unhealthy_services }} de {{ $json.total_services }} serviços estão com problema",
+                "fields": [
+                  {
+                    "title": "Detalhes dos Problemas",
+                    "value": "{% for alert in $json.alerts %}• **{{ alert.service }}**: {{ alert.issue }}\\n{% endfor %}",
+                    "short": false
+                  },
+                  {
+                    "title": "Verificado em",
+                    "value": "{{ $json.summary.checked_at }}",
+                    "short": true
+                  }
+                ]
+              }
+            ]
+          },
+          "id": "send-alert",
+          "name": "Send Alert",
+          "type": "n8n-nodes-base.slack",
+          "typeVersion": 2.1,
+          "position": [1340, 400],
+          "credentials": {
+            "slackApi": {
+              "id": "slack-credentials",
+              "name": "Slack Credentials"
+            }
+          }
+        }
+      ],
+      "connections": {
+        "Every 2 Minutes": {
+          "main": [
+            [
+              {
+                "node": "Setup Services",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Setup Services": {
+          "main": [
+            [
+              {
+                "node": "Check Service",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Check Service": {
+          "main": [
+            [
+              {
+                "node": "Process Results",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Process Results": {
+          "main": [
+            [
+              {
+                "node": "Has Alerts?",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Has Alerts?": {
+          "main": [
+            [
+              {
+                "node": "Log Monitoring",
+                "type": "main",
+                "index": 0
+              },
+              {
+                "node": "Send Alert",
+                "type": "main",
+                "index": 0
+              }
+            ],
+            [
+              {
+                "node": "Log Monitoring",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        }
+      }
+    }
+  },
+
+  "instructions": {
+    "how_to_import": [
+      "1. Copie o JSON do template desejado",
+      "2. No n8n, clique em 'Import from URL/File'", 
+      "3. Cole o JSON e clique em 'Import'",
+      "4. Configure as credenciais necessárias",
+      "5. Ative o workflow"
+    ],
+    
+    "required_credentials": {
+      "email_workflows": "Configure SMTP ou Gmail credentials",
+      "database_workflows": "Configure PostgreSQL/MySQL credentials", 
+      "slack_workflows": "Configure Slack App credentials",
+      "api_workflows": "Configure API keys conforme necessário"
+    },
+    
+    "customization_tips": [
+      "Ajuste os intervalos de cron conforme sua necessidade",
+      "Modifique as URLs e endpoints para seus serviços",
+      "Personalize as mensagens de Slack/email",
+      "Adapte as validações de dados para seu caso",
+      "Configure webhooks com URLs únicas"
+    ]
+  },
+
+  "usage_examples": {
+    "webhook_testing": {
+      "description": "Como testar webhooks",
+      "curl_example": "curl -X POST https://seu-n8n.com/webhook/api/dados \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"nome\": \"Teste\", \"email\": \"teste@exemplo.com\"}'"
+    },
+    
+    "slack_alert_testing": {
+      "description": "Como enviar alerta para Slack",
+      "curl_example": "curl -X POST https://seu-n8n.com/webhook/alert \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"title\": \"Teste de Alerta\", \"message\": \"Sistema funcionando\", \"severity\": \"low\", \"source\": \"teste-manual\"}'"
+    }
+  }
+}
+            
