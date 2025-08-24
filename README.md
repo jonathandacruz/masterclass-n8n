@@ -1,5 +1,3 @@
-# masterclass-n8n
-
 # Guia Completo n8n: Do Básico ao Avançado
 
 🎥 **Canal no YouTube:** [youtube.com/@jonathandacruz](https://www.youtube.com/@jonathandacruz)
@@ -691,8 +689,8 @@ workflows/
 ## 📚 Recursos Adicionais
 
 - **Documentação Oficial**: https://docs.n8n.io
-- **Community**: https://community.n8n.io
-- **Templates**: https://n8n.io/workflows
+- **Community**: [https://jonathandacruz.com.br/automacao-n8n](https://jonathandacruz.com.br/automacao-n8n)
+- **Templates**: [https://jonathandacruz.com.br/templates](https://jonathandacruz.com.br/templates)
 - **GitHub**: https://github.com/n8n-io/n8n
 
 ---
